@@ -7,7 +7,6 @@ import org.apache.poi.ss.util.CellRangeAddressList
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
 import org.apache.poi.xssf.usermodel.XSSFDataValidationHelper
 import org.apache.poi.xssf.usermodel.XSSFSheet
-import org.apache.poi.xssf.usermodel.XSSFSheetConditionalFormatting
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.FileInputStream
 import java.io.FileOutputStream
@@ -31,15 +30,15 @@ class ShenTableUpdater(path: String) {
             val sheet = it.getSheetAt(0)
             var shenTableLine = DataCache.paiTableEndLine + 1
 
-            shenTableLine = setTitle(sheet, shenTableLine)
+            shenTableLine = writeTitle(sheet, shenTableLine)
 
-            shenTableLine = setField(sheet, shenTableLine)
+            shenTableLine = writeField(sheet, shenTableLine)
 
             readCustomer(sheet, shenTableLine)
 
             shenTableLine = writeCustomer(sheet, shenTableLine)
 
-            shenTableLine = setSummaryField(sheet, shenTableLine)
+            shenTableLine = writeSummaryField(sheet, shenTableLine)
 
             shenTableLine = writeSummary(sheet, shenTableLine)
 
@@ -54,7 +53,7 @@ class ShenTableUpdater(path: String) {
     /**
      * 设置标题
      */
-    private fun setTitle(sheet: XSSFSheet, titleLineNum: Int): Int {
+    private fun writeTitle(sheet: XSSFSheet, titleLineNum: Int): Int {
         val titleLine = sheet.getRow(titleLineNum)
 
         /**
@@ -87,7 +86,7 @@ class ShenTableUpdater(path: String) {
     /**
      * 设置字段行
      */
-    private fun setField(sheet: XSSFSheet, fieldLineNum: Int): Int {
+    private fun writeField(sheet: XSSFSheet, fieldLineNum: Int): Int {
         val fieldLine = sheet.getRow(fieldLineNum) ?: sheet.createRow(fieldLineNum)
 
         fieldLine.createCell(0).setCellValue("cn/xyid")
@@ -104,7 +103,7 @@ class ShenTableUpdater(path: String) {
         return fieldLineNum + 1
     }
 
-    private fun setSummaryField(sheet: XSSFSheet, fieldLineNum: Int): Int {
+    private fun writeSummaryField(sheet: XSSFSheet, fieldLineNum: Int): Int {
         val fieldLine = sheet.getRow(fieldLineNum) ?: sheet.createRow(fieldLineNum)
 
         fieldLine.createCell(1).setCellValue("定金汇总")
@@ -145,7 +144,10 @@ class ShenTableUpdater(path: String) {
     }
 
     private fun writeCustomer(sheet: XSSFSheet, startLineNum: Int): Int {
-        //设置数据有效性约束
+        /*
+         * 设置数据有效性约束
+         * 是否已肾一列应当仅从“已肾”和“未肾”两种情况中选择
+         */
         val regionList1 = CellRangeAddressList(startLineNum, startLineNum + DataCache.customerList.size - 1, 2, 2)
         val regionList2 = CellRangeAddressList(startLineNum, startLineNum + DataCache.customerList.size - 1, 4, 4)
         val validationHelper = XSSFDataValidationHelper(sheet)
@@ -156,7 +158,10 @@ class ShenTableUpdater(path: String) {
         sheet.addValidationData(validation1)
         sheet.addValidationData(validation2)
 
-        //设置格式规则
+        /**
+         * 设置格式规则
+         * 已肾背景色应当自动为绿色，未肾背景色应当自动为红色
+         */
         val region1 = CellRangeAddress(startLineNum, startLineNum + DataCache.customerList.size - 1, 2, 2)
         val region2 = CellRangeAddress(startLineNum, startLineNum + DataCache.customerList.size - 1, 4, 4)
         val formatting = sheet.sheetConditionalFormatting
@@ -182,7 +187,7 @@ class ShenTableUpdater(path: String) {
                 cell.cellStyle = tableStyle.borderStyle as XSSFCellStyle?
                 when (c) {
                     0 -> {
-                        cell.setCellValue(customer.cn)
+                        cell.setCellValue(customer.nickname)
                     }
 
                     1 -> {

@@ -1,5 +1,5 @@
-import Model.Customer
-import Model.Goods
+import model.Customer
+import model.Goods
 import PaiTableAnalyzer.Status.*
 import org.apache.poi.ss.usermodel.CellType.*
 import org.apache.poi.ss.usermodel.Sheet
@@ -11,8 +11,6 @@ import java.io.FileInputStream
  */
 object PaiTableAnalyzer {
     //字段扫描状态
-    private val roleDataField = setOf("角色")
-    private val priceFixField = setOf("调价")
     private var roleDataColGet = false
     private var priceFixColGet = false
     private var customerColGet = false
@@ -67,20 +65,20 @@ object PaiTableAnalyzer {
                                 STRING -> {
                                     val text = cell.stringCellValue
                                     when {
-                                        (text.equals("定金均价")) -> {
+                                        (Constant.averageDepositField.contains(text)) -> {
                                             readingStatus = SCANNING_AVERAGE_DEPOSIT
                                         }
 
-                                        (text.equals("尾款均价")) -> {
+                                        (Constant.averageBalanceField.contains(text)) -> {
                                             readingStatus = SCANNING_AVERAGE_BALANCE
                                         }
 
-                                        (roleDataField.contains(text)) -> {
+                                        (Constant.typeDataField.contains(text)) -> {
                                             DataCache.ColVal.roleCol = c
                                             roleDataColGet = true
                                         }
 
-                                        (priceFixField.contains(text)) -> {
+                                        (Constant.priceFixField.contains(text)) -> {
                                             DataCache.ColVal.priceFixCol = c
                                             priceFixColGet = true
                                         }
@@ -121,8 +119,8 @@ object PaiTableAnalyzer {
                             when{
                                 //谷子名称
                                 (c == DataCache.ColVal.roleCol) -> {
-                                    goodsNow.roleName = cell.stringCellValue
-                                    DataCache.goodsMap[goodsNow.roleName] = goodsNow
+                                    goodsNow.typeName = cell.stringCellValue
+                                    DataCache.goodsMap[goodsNow.typeName] = goodsNow
                                 }
 
                                 //谷子调价
@@ -149,7 +147,7 @@ object PaiTableAnalyzer {
                                             //表中不包括该吃谷人则添加
                                             if(!DataCache.customerMap.contains(cn)){
                                                 val customer = Customer()
-                                                customer.cn = cn
+                                                customer.nickname = cn
                                                 DataCache.customerMap[cn] = customer
                                                 DataCache.customerList.add(customer)
                                             }
