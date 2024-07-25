@@ -4,6 +4,9 @@ import org.apache.poi.ss.usermodel.FillPatternType
 import org.apache.poi.ss.usermodel.IndexedColors
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 
+/**
+ * 表格样式预设
+ */
 class TableStyle(xssfWorkbook:XSSFWorkbook) {
     val borderStyle: CellStyle
     val currencyStyle: CellStyle
